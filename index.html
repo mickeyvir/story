@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amar Golpo - Live Preview</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #090a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .terminal-window {
+            background-color: #13151f;
+            border: 1px solid #2a2e42;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+            max-width: 720px;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background-color: #1c1f2e;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2e42;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .red { background-color: #ff5f56; }
+        .yellow { background-color: #ffbd2e; }
+        .green { background-color: #27c93f; }
+
+        .title {
+            margin-left: 8px;
+            font-size: 0.88rem;
+            color: #888ea8;
+            letter-spacing: 0.5px;
+        }
+
+        .start-screen {
+            padding: 95px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .start-hint {
+            color: #6c7393;
+            font-size: 0.85rem;
+        }
+
+        .start-btn {
+            background-color: #ff79c6;
+            color: #090a0f;
+            border: none;
+            padding: 15px 38px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: inherit;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 22px rgba(255, 121, 198, 0.5);
+            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .start-btn:hover {
+            background-color: #ff92d0;
+            transform: scale(1.05);
+            box-shadow: 0 0 28px rgba(255, 121, 198, 0.7);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #story-box {
+            padding: 28px 26px;
+            font-size: 1.15rem;
+            line-height: 1.85;
+            font-weight: bold;
+            min-height: 300px;
+        }
+
+        .line {
+            margin-bottom: 14px;
+            word-wrap: break-word;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: #ff79c6;
+            vertical-align: middle;
+            margin-left: 3px;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .replay-container {
+            padding: 0 26px 24px 26px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .replay-btn {
+            background-color: transparent;
+            color: #ff79c6;
+            border: 1px solid #ff79c6;
+            padding: 8px 18px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .replay-btn:hover {
+            background-color: #ff79c6;
+            color: #090a0f;
+            box-shadow: 0 0 14px rgba(255, 121, 198, 0.4);
+        }
+
+        /* Glowing Text Colors */
+        .gold { color: #ffd700; text-shadow: 0 0 8px rgba(255, 215, 0, 0.35); }
+        .rose { color: #ff79c6; text-shadow: 0 0 8px rgba(255, 121, 198, 0.35); }
+        .cyan { color: #50fa7b; text-shadow: 0 0 8px rgba(80, 250, 123, 0.35); }
+        .violet { color: #bd93f9; text-shadow: 0 0 8px rgba(189, 147, 249, 0.35); }
+        .white { color: #f8f8f2; }
+
+        @media (max-width: 520px) {
+            #story-box {
+                font-size: 1rem;
+                padding: 20px 18px;
+            }
+            .start-btn {
+                padding: 13px 28px;
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-window">
+        <!-- Terminal Header -->
+        <div class="terminal-header">
+            <div class="header-left">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="title">amar_golpo.exe</span>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="start-screen">
+            <button id="start-btn" class="start-btn">▶ Start</button>
+            <span class="start-hint">Click Start to run amar_golpo.exe</span>
+        </div>
+
+        <!-- Story Output Area -->
+        <div id="story-box" class="hidden"></div>
+
+        <!-- Replay Button (shown when story ends) -->
+        <div id="replay-container" class="replay-container hidden">
+            <button id="replay-btn" class="replay-btn">↻ Replay</button>
+        </div>
+    </div>
+
+    <script>
+        // Story configuration matching the requested lines, colors, and pacing
+        const golpo = [
+                { text: "✨ আজ তোমাদের একটা গল্প বলি, শুনলে হাসবে তবে মিলও পেতে পারো!", color: "gold", speed: 80, pause: 800 },
+    { text: "💖আমি সুপ্রিয়, থাকি হলদিয়াতে। গল্পটা শোনো আর কমেন্ট এ বলো, তোমাদের সঙ্গেও কি এমন হয়েছে?!", color: "rose", speed: 70, pause: 1200 },
+    { text: "ও প্রথমেই বলেছে, আমার প্রতি ওর তেমন কোনো ফিলিংস নাই। তাও কথা হতো, অনেক স্মৃতিও বানিয়েছি। আগে আগে আমি না বললেও ও ওর সারাদিন এ কথা আমাকে বলত, আমিও মন দিয়ে শুনতাম।একটা অ্যাটাচমেন্ট এসে গেছিল। আর জানো তো, অ্যাটাচমেন্ট এলে এক্সপেক্টেশনও আসে! আমার ক্ষেত্রেও সেটাই হয়েছে। কিছু দিন ধরে ওকে মেসেজ করছি, শুধু রিপ্লাই এই আসছে—যেমন 'ওই', উত্তর এল 'হ্যাঁ বলো'। জিজ্ঞাসা করলাম, কেমন আছো? কোনো উত্তর নেই! ১ ঘণ্টা, ২ ঘণ্টা থেকে ৫ ঘণ্টা অপেক্ষা করলাম। দেখলাম অনলাইন আছে, কিন্তু মেসেজের রিপ্লাই তো দূরের কথা, দেখেওনি!.", color: "cyan", speed: 60, pause: 1000 },
+    { text: "নিজের ওপর লজ্জা লাগল, তারপর মেসেজটাই ডিলিট করে দিলাম। ২৪ ঘণ্টা পর মেসেজ করল—'ওই'! আমি তাতেই জানি না কেন খুশিতে সঙ্গে সঙ্গে মেসেজের রিপ্লাই দিয়ে দিলাম। রিপ্লাই দেওয়ার পর আবার সেই অপেক্ষা। আগে কিন্তু ব্যাপারট অন্যরকম ছিল—মেসেজ এলে আগে রিপ্লাই, তারপর কাজ!.", color: "white", speed: 80, pause: 1000 },
+    { text: "এখন ব্যাপার আরও একধাপ এগিয়েছে। মুখে তো অনেক কিছু বলে, কিন্তু ইগ্নোর লেভেলটা টপ ক্লাসে উঠেছে! আমি জানি ওর জীবনে অন্য কেউ আছে, তবুও নিজেকে ওর জন্য ফ্রি করে রেখেছিলাম—দোকান বন্ধ, কিন্তু কাস্টমার এখনও দোকানে দাঁড়িয়ে! এখন আর ওকে আমি নিজে থেকে মেসেজ করি না।.", color: "violet", speed: 50, pause: 1000 },
+    { text: "কারণ জানো? নিজের সেলফ রেস্পেক্ট এ আঘাত লেগেছে! আমি কারোর টাইমপাস বা অপশন হতে চাই না। আসলে আমি কোনো দিন এতটা সস্তা ছিলাম না, যতটা ও আমাকে ভেবে নিয়েছে।.", color: "gold", speed: 50, pause: 1000 },
+    { text: "✨আমি নিজের এক্সপেরিয়েন্স এ তোমাদের একটা কথা বলি, জীবনের সবথেকে বড় শিক্ষা হলো, কোথায় থামতে হবে সেটা জানা। আর কোথায় থেকে নিজেকে সরিয়ে নিতে হবে, সেটা বোঝা! ✨", color: "rose", speed: 65, pause: 500 }
+        ];
+
+        const startScreen = document.getElementById('start-screen');
+        const startBtn = document.getElementById('start-btn');
+        const storyBox = document.getElementById('story-box');
+        const replayContainer = document.getElementById('replay-container');
+        const replayBtn = document.getElementById('replay-btn');
+
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+
+        let runToken = 0; // Cancels previous loop if replayed mid-way
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function playStory() {
+            const currentRun = ++runToken;
+            storyBox.innerHTML = '';
+            replayContainer.classList.add('hidden');
+
+            for (let item of golpo) {
+                if (currentRun !== runToken) return;
+
+                const lineDiv = document.createElement('div');
+                lineDiv.className = `line ${item.color}`;
+                storyBox.appendChild(lineDiv);
+                lineDiv.appendChild(cursor);
+
+                for (let char of item.text) {
+                    if (currentRun !== runToken) return;
+                    const textNode = document.createTextNode(char);
+                    lineDiv.insertBefore(textNode, cursor);
+                    const jitter = Math.random() * 22 - 10;
+                    await sleep(Math.max(20, item.speed + jitter));
+                }
+
+                await sleep(item.pause);
+            }
+
+            if (currentRun === runToken) {
+                cursor.remove();
+                replayContainer.classList.remove('hidden');
+            }
+        }
+
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            storyBox.classList.remove('hidden');
+            playStory();
+        });
+
+        replayBtn.addEventListener('click', () => {
+            playStory();
+        });
+    </script>
+    <audio id="bgMusic" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+<script>
+const music = document.getElementById("bgMusic");
+
+// ব্রাউজার ব্লক করলে প্রথম ক্লিকেই গান চালু হবে
+document.addEventListener("click", () => {
+    music.play().catch(() => {});
+}, { once: true });
+</script>
+</body>
+</html>
